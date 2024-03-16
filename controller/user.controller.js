@@ -7,7 +7,7 @@ import crypto from 'crypto'
 import sendEmail from "../utils/sendEmail.js";
 const cookieOptions={
     maxAge:7*24*60*60*1000,//multiply by 1000 for milisecond and it will be present for 7 days\
-    httpOnly:true,
+    httpOnly:true,  //not be accessed thourgh javascript
     secure:true 
 }
 const register  = async(req,res,next)=>{
@@ -26,17 +26,19 @@ const register  = async(req,res,next)=>{
         password,
         avatar:{
             public_id:email,
-            secure_url:'https://www.bing.com/ck/a?!&&p=4edbbb4305760339JmltdHM9MTcwNzk1NTIwMCZpZ3VpZD0zMDE0ODI5Ny0wMDc0LTY5NzgtMDUyZS05MmU3MDFlZjY4NDYmaW5zaWQ9NTQ3OQ&ptn=3&ver=2&hsh=3&fclid=30148297-0074-6978-052e-92e701ef6846&u=a1L2ltYWdlcy9zZWFyY2g_cT1pbWFnZSZpZD1GRkMwM0U2OTY2M0YyNzgyN0M2MTk4QTAyQTFGMjZCNkUyN0E0MEY4JkZPUk09SVFGUkJB&ntb=1'
+            // secureurl is  environment variable with api key,api secret
+            secure_url:'cloudinary://378171611453713:jar_yV68UrVNSKbFbxleqoBxKJQ@dix9kn7zm'
         }
     })
-    // if not user doesnot stred succcessfully 
+    // if not user doesnot stored succcessfully 
     if(!user){
         return next(new AppError('User registration is failed please try again',400))
     }
 
-    // these file we will get from bi=ody after the avatar is converted to binary
+    // these file we will get from bi=ody after the avatar is converted from binary\
+    console.log('File deatils-> ',JSON.stringify(req.file));
     if(req.file){
-        console.log('File deatils-> ',JSON.stringify(req.file));
+       
         try{
             const result=await cloudinary.v2.uploader.upload(req.file.path,{
                 // at which folder you have to upload the image
@@ -49,10 +51,12 @@ const register  = async(req,res,next)=>{
             })
             if(result){
                 user.avatar.public_id=result.public_id
+
                 user.avatar.secure_url=result.secure_url    
+                console.log("URL IMAGE",result.secure_url);
                 
                 // remove file from local system/server
-                fs.rm(`uploads/${req.file.filename}`)
+                // fs.rm(`uploads/${req.file.filename}`)
 
             }
         }catch(e){
@@ -61,12 +65,14 @@ const register  = async(req,res,next)=>{
             )
         }
     }
-    // ater registration for dirctly login thatswyh used jwt token
-    const token=await user.generateJWTToken()
-    res.cookie('token',token,cookieOptions)
+  
     // TODO: file upload
-    await user.save()
+    await user.save()   // user will be saved
     user.password=undefined
+      // ater registration for dirctly login thatswyh used jwt token
+      const token=await user.generateJWTToken()
+    //   setting thetoken to cookie
+      res.cookie('token',token,cookieOptions)
     res.status(201).json({
         success:true,
         message:"User registered successfully",
@@ -112,8 +118,7 @@ const logout=(req,res)=>{
 }
 
 const getProfile=async(req,res)=>{
-    const userId = req.user.id
-    const user=await User.findById(userId)
+   
     try{
         const userId = req.user.id
         const user=await User.findById(userId)
@@ -129,6 +134,8 @@ const getProfile=async(req,res)=>{
 
 }
 
+
+// firgot and reset password is not working
 const forgotPassword=async(req,res,next)=>{
     const {email}=req.body;
     if(!email){
@@ -137,16 +144,18 @@ const forgotPassword=async(req,res,next)=>{
     const user=await User.findOne({email})
     if(!user){
         return next(new AppError('Enter registered email',400))
-    }
+    } 
       // Generating the reset token via the method we have in user model
-    const resetToken=await user.generatePasswordResetToken()
+    const resetToken=await user.generatePasswordResetToken();
     // saving the token to db
-    await user.save()
+    // saving the current token to DB so that for validation
+    await user.save() 
 
-    // const resetPasswordUrl=`${process.env.FRONTEND_URL}/reset-password/${resetToken}`
-    const message= `URL`
+    const resetPasswordUrl=`${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    const message= 'Mail is send to registered email id' 
     const subject='Reset Password';
-    try{
+    try{ 
+        // method that will send the  mail;  ;
         await sendEmail(email,subject,message)
         res.status(200).json({
             success:true,
@@ -157,7 +166,7 @@ const forgotPassword=async(req,res,next)=>{
         user.forgotPasswordExpiry=undefined
         user.forgotPasswordToken=undefined
         await user.save()
-        return next(new AppError(toString(e).message,500))
+        return next(new AppError(toString(e).message,50)) 
     }
 }
 const resetPassword=async(req,res)=>{
@@ -233,7 +242,7 @@ const updateUser=async(req,res)=>{
     if(req.fullName){
         user.fullName=fullName
     }
-    // update the avatar
+    // update the avatar if avatar is provided 
     if(req.file){
         // destroying the existing image
         await cloudinary.v2.uploader.destroy(user.avatar.public_id)
@@ -280,6 +289,6 @@ export{
     updateUser,
     login,
     forgotPassword,
-    // resetPassword,
+    resetPassword,
     changePassword
 }

@@ -7,6 +7,7 @@ mongoose.set('strictQuery',false)
 
 const connectionToDB=async()=>{
     try{
+        // it will proide a instance
         const {connection}=await mongoose.connect(
             process.env.MONGO_URL
         )
@@ -17,6 +18,7 @@ const connectionToDB=async()=>{
     }
     catch(e){
         console.log(e);
+        // forcefully exit
         process.exit(1);
     }
 }

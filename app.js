@@ -9,7 +9,7 @@ const app=express()
 // for parsing to json data directly
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))        //it will extract out the query params from url
-app.use(morgan('dev'))
+app.use(morgan('dev'))  //morgan will track all the access point or to which url the request made at localhost and it will print it in terminal 
 app.use(cors({
     // frntend ka url will be different thatswhy by using cors we can interact with frontend page
     origin:[process.env.FRONTEND_URL],
@@ -17,7 +17,8 @@ app.use(cors({
     credentials:true
 }));
 // cookie parser is udes to get the directly token which is used in isLoggedin method used in auth middleware
-app.use(cookieParser())
+// for parsing the token
+app.use(cookieParser()) //by using cookie parrser token can be extracted easily that is used in auth.middleware.js
 // app.use(exp)
 app.use('/ping',function(req,res){
     res.send('/pong')

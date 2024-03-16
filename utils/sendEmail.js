@@ -12,7 +12,7 @@ const sendEmail = async function (email, subject, message) {
       pass: process.env.SMTP_PASSWORD,
     },
   });
-
+ 
   // send mail with defined transport object
   await transporter.sendMail({
     from: process.env.SMTP_FROM_EMAIL, // sender address

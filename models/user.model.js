@@ -38,15 +38,18 @@ const userSchema =  new Schema({
     },
     role:{
         type:'String',
+        // enum possible roles
         enum:['USER','ADMIN'],
         default:'USER'
     }  ,  
+    // these are used in below function generatePasswordResetToke
     forgotPasswordToken:String,
     forgotPasswordExpiry:Date   
 },{
+    // it will provide the time
     timestamps:true     
 })
-
+// these will just encrypt the password before saving it in DB
 userSchema.pre('save',async function(next){
     if(!this.isModified('password')){
         return next()
@@ -58,7 +61,7 @@ userSchema.pre('save',async function(next){
 userSchema.methods = {
     generateJWTToken: async function(){
         return await jwt.sign(
-            {id:this._id ,subscription:this.subscription,role:this.role},
+            {id:this._id ,email:this.email,subscription:this.subscription,role:this.role},
             process.env.JWT_SECRET,
             {
                 expiresIn:process.env.JWT_EXPIRY,
@@ -74,6 +77,7 @@ userSchema.methods = {
         // directly used library
         const resetToken=crypto.randomBytes(20).toString('hex')
         this.forgotPasswordToken=crypto
+        // converting reset token to encrypted form// ;
             .createHash('sha256')
             .update(resetToken)
             .digest('hex')
