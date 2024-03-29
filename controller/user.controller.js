@@ -56,7 +56,7 @@ const register  = async(req,res,next)=>{
                 console.log("URL IMAGE",result.secure_url);
                 
                 // remove file from local system/server
-                // fs.rm(`uploads/${req.file.filename}`)
+                fs.rm(`uploads/${req.file.filename}`)
 
             }
         }catch(e){

@@ -51,12 +51,12 @@ const createCourses=async(req,res,next)=>{
     // creating the courses instance
     const courses=await Course.create({ 
         title,
-        description,
+        description, 
         category,
         createdBy,
         thumbnail:{
             public_id:'Dummmy',
-            secure_url:'Dummy'
+            secure_url:'Dummy'   
         }
     })
 
@@ -154,12 +154,12 @@ const addLectureByCourseId=async(req,res,next)=>{
    try{
     const {title ,description}=req.body
     const {id}=req.params;
-
-    if(!title || !description){
-        return next(
-            new AppError('All fields are required',400)
-        )
-    }
+    console.log(id);
+    // if(!title || !description){
+    //     return next(
+    //         new AppError('All fields are required',400)
+    //     )
+    // }
     const course=await Course.findById(id)
     if(!course){
         return next(
@@ -174,10 +174,12 @@ const addLectureByCourseId=async(req,res,next)=>{
     if(req.file){
         try{
             const result=await cloudinary.v2.uploader.upload(req.file.path,{
-                folder:'lms'
+                folder:'lms',
+                // resource_type: 'video', 
             })
             if(result){
                 lectureData.lecture.public_id=result.public_id 
+                console.log('result secure',result.secure_url);
                 lectureData.lecture.secure_url=result.secure_url
             }
     

@@ -7,17 +7,17 @@ const router=Router()   //creating the instance
 
 router.route('/')
 // it is used when we have to change thee method like get,post
-    .get(getAllCourses)
+    .get(getAllCourses) 
     .post(
         isLoggedIn,
-        authorisedRoles('ADMIN'),
+        // authorisedRoles("ADMIN"),
         upload.single('thumbnail'), 
         createCourses)
 router.route('/:id')
     .get(isLoggedIn,getLectureByCourseId)
     .put(isLoggedIn, authorisedRoles('ADMIN'),updateCourses)
     .delete(isLoggedIn, authorisedRoles('ADMIN'),removeCourses)
-    .post(isLoggedIn,authorisedRoles('ADMIN'),upload.single('lecture'), addLectureByCourseId)
+    .post(addLectureByCourseId)
 
 
 export default router
