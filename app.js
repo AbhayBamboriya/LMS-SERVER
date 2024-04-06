@@ -6,6 +6,13 @@ import morgan from 'morgan';
 import courseRoute from './routes/course.routes.js'
 import errorMiddleware from './middleware/error.middleware.js';
 const app=express()
+// Enable CORS for all routes
+app.use((req, res, next) => {
+    // res.header('Access-Control-Allow-Origin', '*');
+    // res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization,GET , POST');
+    next();
+});
 // for parsing to json data directly
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))        //it will extract out the query params from url
@@ -23,6 +30,8 @@ app.use(cookieParser()) //by using cookie parrser token can be extracted easily 
 app.use('/ping',function(req,res){
     res.send('/pong')
 })
+
+
 app.use('/api/v1/user',userRoutes);
 app.use('/api/v1/course',courseRoute);    
 // routes of diffenent module
@@ -33,3 +42,6 @@ app.all('*',(req,res)=>{
 // error will be send to user
 app.use(errorMiddleware)
 export default app
+
+// json web token
+// nodemailer

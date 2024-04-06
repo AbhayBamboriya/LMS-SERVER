@@ -5,11 +5,12 @@ import fs from 'fs/promises'
 const getAllCourses=async function(req,res,next){
     // selecting all the things accept lecture
     const course=await Course.find({}).select('-lectures')
+    // console.log("course "+course);
     try{
         res.status(200).json({
             success:true,
             message:'All Courses',
-            courses
+            course
         })
     }
     catch(e){
@@ -154,7 +155,7 @@ const addLectureByCourseId=async(req,res,next)=>{
    try{
     const {title ,description}=req.body
     const {id}=req.params;
-    console.log(id);
+    console.log("idddd "+id);
     // if(!title || !description){
     //     return next(
     //         new AppError('All fields are required',400)
@@ -192,6 +193,7 @@ const addLectureByCourseId=async(req,res,next)=>{
         }
     }
         // pushing into the data base
+        console.log('lexture---------- '+JSON.stringify(lectureData));
     course.lectures.push(lectureData)
 
     // updating the no of ;ectures

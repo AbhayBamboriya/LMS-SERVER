@@ -7,8 +7,8 @@ import crypto from 'crypto'
 import sendEmail from "../utils/sendEmail.js";
 const cookieOptions={
     maxAge:7*24*60*60*1000,//multiply by 1000 for milisecond and it will be present for 7 days\
-    httpOnly:true,  //not be accessed thourgh javascript
-    secure:true 
+    // httpOnly:true,  //not be accessed thourgh javascript
+    // secure:true 
 }
 const register  = async(req,res,next)=>{
     const {fullName,email,password}=req.body;
@@ -118,19 +118,29 @@ const logout=(req,res)=>{
     })
 }
 
-const getProfile=async(req,res)=>{
-   
+const getProfile=async(req,res,next)=>{
+    console.log("user"+req.user);
     try{
         const userId = req.user.id
+        // const userId=req.body
+        console.log(userId);
         const user=await User.findById(userId)
+        console.log("user"+user);
         res.status(200).json({
             success:true,
             message:"User Details",
             user
         })
     }
+    // onst user = await User.findById(id).select('+password')
+    // if(!user){
+    //     return next(
+    //         new AppError('User does not exist',400)
+    //     )
+
+    // }
     catch(e){
-        return next(new AppError("falied to get the information",400))
+        return next(new AppError(e.message,400))
     }
 
 }
@@ -151,13 +161,15 @@ const forgotPassword=async(req,res,next)=>{
     // saving the token to db
     // saving the current token to DB so that for validation
     await user.save() 
-
-    const resetPasswordUrl=`${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    // console.log("token "+resetToken);
+    const resetPasswordUrl=`${process.env.FRONTEND_URL}password/${resetToken}`;
+    console.log("reset Token "+resetPasswordUrl);
     const message= 'Mail is send to registered email id' 
     const subject='Reset Password';
     try{ 
         // method that will send the  mail;  ;
-        await sendEmail(email,subject,message)
+        const e=await sendEmail(email,subject,message)
+        console.log("email "+e);
         res.status(200).json({
             success:true,
             message:`Reset Password token has been send to ${email} successfully`
@@ -167,12 +179,16 @@ const forgotPassword=async(req,res,next)=>{
         user.forgotPasswordExpiry=undefined
         user.forgotPasswordToken=undefined
         await user.save()
-        return next(new AppError(toString(e).message,50)) 
+        return next(new AppError(toString(e).message,500)) 
     }
 }
-const resetPassword=async(req,res)=>{
+const resetPassword=async(req,res,next)=>{
+    console.log("params "+req.params);
+    console.log("body "+req.body);
     const {resetToken} = req.params;
     const{password}=req.body
+    console.log("reset Token "+resetToken);
+    console.log("password "+password);
     const forgotPasswordToken=crypto
         .createHash('sha256')
         .update(resetToken)
@@ -198,9 +214,13 @@ const resetPassword=async(req,res)=>{
     })
 }
 
-const changePassword=async(req,res)=>{
+const changePassword=async(req,res,next)=>{
+
     const {oldpassword,newpassword}= req.body
     const {id}=req.user
+    console.log('id '+id);
+    console.log("old pass "+oldpassword);
+    console.log('new pass '+newpassword);
     if(!oldpassword || !newpassword){
         return next(
             new AppError('All filds are mandatory',400)
@@ -230,25 +250,27 @@ const changePassword=async(req,res)=>{
     })
 }
 
-const updateUser=async(req,res)=>{
-    const {fullName}=req.body
-    const{id}=req.user.id
+const updateUser=async(req,res,next)=>{
+    const fullName=req.body.fullName
+    const id=req.user.id
+    // const {id}=req.body
+    console.log('fullname '+fullName);
+    console.log("id "+id);
     const user=await User.findById(id);
+    console.log("user"+user);
     if(!user){
         return next(
             new AppError('User does not exist',400)
         )
 
     }
-    if(req.fullName){
+    if(fullName){
         user.fullName=fullName
     }
     // update the avatar if avatar is provided 
     if(req.file){
         // destroying the existing image
         await cloudinary.v2.uploader.destroy(user.avatar.public_id)
-
-        
             try{
                 const result=await cloudinary.v2.uploader.upload(req.file.path,{
                     // at which folder you have to upload the image
@@ -277,6 +299,7 @@ const updateUser=async(req,res)=>{
 
     await user.save()
     res.status(200).json({
+        // user,
         success:true,
         message:"Changes are uploaded successfully"
     })

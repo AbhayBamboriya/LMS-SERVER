@@ -10,14 +10,14 @@ router.route('/')
     .get(getAllCourses) 
     .post(
         isLoggedIn,
-        // authorisedRoles("ADMIN"),
+        authorisedRoles("ADMIN"),
         upload.single('thumbnail'), 
-        createCourses)
+        createCourses)      //working properly
 router.route('/:id')
-    .get(isLoggedIn,getLectureByCourseId)
-    .put(isLoggedIn, authorisedRoles('ADMIN'),updateCourses)
-    .delete(isLoggedIn, authorisedRoles('ADMIN'),removeCourses)
-    .post(addLectureByCourseId)
+    .get(isLoggedIn,getLectureByCourseId)   //working properly
+    .put(isLoggedIn, authorisedRoles('ADMIN'),updateCourses)        //working properly
+    .delete(isLoggedIn, authorisedRoles('ADMIN'),removeCourses)     //working properly
+    .post(isLoggedIn,authorisedRoles('ADMIN'),upload.single('lecture'),addLectureByCourseId)        //working properly
 
 
 export default router
