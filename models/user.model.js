@@ -44,7 +44,11 @@ const userSchema =  new Schema({
     }  ,  
     // these are used in below function generatePasswordResetToke
     forgotPasswordToken:String,
-    forgotPasswordExpiry:Date   
+    forgotPasswordExpiry:Date  ,
+    subscription:{
+        id:String,
+        status:String
+    } 
 },{
     // it will provide the time
     timestamps:true     

@@ -3,7 +3,7 @@ import { changePassword, forgotPassword, getProfile, login, logout, register, re
 import { isLoggedIn } from "../middleware/auth.middleware.js";
 import upload from '../middleware/multer.middleware.js'
 const router =Router(); //creating instance
-
+// accept update user all are working correctly
 router.post('/register',upload.single("avatar"),register)   //in upload single file orhow many file u have to upload
 router.post('/login',login) 
 router.get('/logout',logout)

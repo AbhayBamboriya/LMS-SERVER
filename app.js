@@ -4,12 +4,13 @@ import cors from 'cors'
 import cookieParser  from 'cookie-parser'
 import morgan from 'morgan';
 import courseRoute from './routes/course.routes.js'
+import paymentsRoute from './routes/payment.routes.js'
 import errorMiddleware from './middleware/error.middleware.js';
 const app=express()
 // Enable CORS for all routes
 app.use((req, res, next) => {
-    // res.header('Access-Control-Allow-Origin', '*');
-    // res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization,GET , POST');
     next();
 });
@@ -34,6 +35,8 @@ app.use('/ping',function(req,res){
 
 app.use('/api/v1/user',userRoutes);
 app.use('/api/v1/course',courseRoute);    
+app.use('/api/v1/payments',paymentsRoute);    
+
 // routes of diffenent module
 // any other page which is not present and for that use *
 app.all('*',(req,res)=>{

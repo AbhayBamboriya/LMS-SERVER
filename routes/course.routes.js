@@ -1,6 +1,6 @@
 import {Router} from "express";
 import { addLectureByCourseId, createCourses, getAllCourses, getLectureByCourseId, removeCourses, updateCourses } from "../controller/course.controller.js";
-import { authorisedRoles, isLoggedIn } from "../middleware/auth.middleware.js";
+import { authorisedRoles, authorisedSubscriber, isLoggedIn } from "../middleware/auth.middleware.js";
 import upload from "../middleware/multer.middleware.js";
 const router=Router()   //creating the instance
 
@@ -10,6 +10,7 @@ router.route('/')
     .get(getAllCourses) 
     .post(
         isLoggedIn,
+        authorisedSubscriber,
         authorisedRoles("ADMIN"),
         upload.single('thumbnail'), 
         createCourses)      //working properly

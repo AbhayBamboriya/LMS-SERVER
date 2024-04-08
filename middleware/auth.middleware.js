@@ -39,7 +39,20 @@ console.log('checkiiiii',JSON.stringify(roles));
     next()
 }
 
+
+const authorisedSubscriber = async(req,res,next) =>{
+    const subscritption=req.user.subscription
+    const currentUser=req.user.role;
+    if(currentUser !== 'ADMIN' && subscritption.status !== 'active'){
+        return next(
+            new AppError('Please subscribe to access these route',403)
+        )
+    }
+
+    next()
+}
 export{
     isLoggedIn,
+    authorisedSubscriber,
     authorisedRoles
 }
