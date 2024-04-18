@@ -283,8 +283,8 @@ const updateUser=async(req,res,next)=>{
                 })
                 if(result){
                     user.avatar.public_id=result.public_id
-                    user.avatar.secure_url=cloudinary.secure_url    
-    
+                    user.avatar.secure_url=result.secure_url    
+                    console.log("url"+result.secure_url );
                     // remove file from local system/server
                     fs.rm(`uploads/${req.file.filename}`)
     

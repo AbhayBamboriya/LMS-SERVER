@@ -15,5 +15,5 @@ router.post('/password/:resetToken',resetPassword)
 //     res.send("helo")
 // }) 
 router.post('/changePassword',isLoggedIn,changePassword)
-router.put('/update',isLoggedIn,upload.single("avatar"),updateUser) 
+router.put('/update/:id',isLoggedIn,upload.single("avatar"),updateUser) 
 export default router
