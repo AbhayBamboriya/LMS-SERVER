@@ -4,19 +4,22 @@ const isLoggedIn = async (req,res,next)=>{
     // due to cookie parser it can extract the token
     // console.log("cookie"+req.cookies);
     // console.log("cookie1"+req.cookie);
+    console.log("req",req.cookies);
     const {token}=req.cookies
-    // console.log("token "+token);
+    console.log("token "+token);
     if(!token){
         return next(new AppError('Unauthenticated , please login again',405))
     }
     const userDetails=await jwt.verify(token,process.env.JWT_SECRET)
-    // console.log("userDetails"+userDetails);
-    if (!userDetails) {
-        return next(new AppError("Unauthorized, please login to continue", 401));
-      }
-    // jwt token is information is saved
-    // console.log('details',userDetails);
-    req.user=userDetails
+    console.log("userDetails"+userDetails);
+    console.log('jwt',jwt);
+    // if (!userDetails) {
+
+    //     return next(new AppError("Unauthorized, please login to continue", 401));
+    //   }
+    // // jwt token is information is saved
+    // // console.log('details',userDetails);
+    // req.user=userDetails
     next()
 }
 
