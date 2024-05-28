@@ -11,7 +11,7 @@ router.route('/')
     .post(
         isLoggedIn,
         authorisedSubscriber,
-        authorisedRoles("ADMIN"),
+        authorisedRoles('ADMIN'),
         upload.single('thumbnail'), 
         createCourses)      //working properly
 router.route('/:id')

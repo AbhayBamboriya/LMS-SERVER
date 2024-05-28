@@ -13,13 +13,14 @@ const isLoggedIn = async (req,res,next)=>{
     const userDetails=await jwt.verify(token,process.env.JWT_SECRET)
     console.log("userDetails"+userDetails);
     console.log('jwt',jwt);
-    // if (!userDetails) {
+    if (!userDetails) {
 
-    //     return next(new AppError("Unauthorized, please login to continue", 401));
-    //   }
+        return next(new AppError("Unauthorized, please login to continue", 401));
+    }
     // // jwt token is information is saved
     // // console.log('details',userDetails);
-    // req.user=userDetails
+    req.user=userDetails
+    
     next()
 }
 
@@ -27,16 +28,16 @@ const isLoggedIn = async (req,res,next)=>{
 const authorisedRoles=(...roles)=>async (req,res,next)=>{
 // req.user me jwt token ke throw saaari information mil jayegi
 console.log('checkiiiii',JSON.stringify(roles));
-    console.log('hhh',req.user);
-    console.log('body',req.body);
-    console.log('resquest',req);
-    console.log('re',req.data);
-    console.log('ressss',toString(req));
-    const currentUser=req.user.role;
+    // console.log('hhh',req);
+    // console.log('body',req.body);
+    // console.log('resquest',req);
+    // console.log('re',req.data);
+    // console.log('ressss',toString(req));
+    const currentUser=req.user.role
     
     if(!roles.includes(currentUser)){
         return next(
-            new AppError('Do not havve permission to access these route ',403)
+            new AppError('Do not have permission to access these route ',403)
         )
     }
     next()
