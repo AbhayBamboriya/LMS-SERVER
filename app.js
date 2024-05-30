@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import courseRoute from './routes/course.routes.js'
 import paymentsRoute from './routes/payment.routes.js'
 import errorMiddleware from './middleware/error.middleware.js';
+import misllaneousRoutes from './routes/misllaneous.routes.js'
 const app=express()
 // Enable CORS for all routes
 app.use((req, res, next) => {
@@ -34,7 +35,7 @@ app.use('/ping',function(req,res){
     res.send('/pong')
 })
 
-
+app.use('/api/v1',misllaneousRoutes)
 app.use('/api/v1/user',userRoutes);
 app.use('/api/v1/course',courseRoute);    
 app.use('/api/v1/payments',paymentsRoute);    

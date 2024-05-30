@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { changePassword, forgotPassword, getProfile, login, logout, register, resetPassword, updateUser  } from "../controller/user.controller.js";
+import { changePassword, checkUser, forgotPassword, getProfile, login, logout, register, resetPassword, updateUser  } from "../controller/user.controller.js";
 import { isLoggedIn } from "../middleware/auth.middleware.js";
 import upload from '../middleware/multer.middleware.js'
 const router =Router(); //creating instance
@@ -11,6 +11,7 @@ router.get('/me',isLoggedIn,getProfile) //first of all it will go through verifi
 //through isloggedin method which is in auth.middleware
 router.post('/reset',forgotPassword);
 router.post('/password/:resetToken',resetPassword) 
+router.post('/check',checkUser)
 // router.post('/password/:resetToken',(req,res)=>{
 //     res.send("helo")
 // }) 

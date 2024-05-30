@@ -2,8 +2,8 @@ import { Router } from 'express';
 import {
   contactUs,
   userStats,
-} from '../controllers/miscellaneous.controller.js';
-import { authorizeRoles, isLoggedIn } from '../middlewares/auth.middleware.js';
+} from '../controller/misllaneous.controller.js';
+import { authorisedRoles, isLoggedIn } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
@@ -11,6 +11,6 @@ const router = Router();
 router.route('/contact').post(contactUs);
 router
   .route('/admin/stats/users')
-  .get(isLoggedIn, authorizeRoles('ADMIN'), userStats);
+  .get(isLoggedIn, authorisedRoles('ADMIN'), userStats);
 
 export default router;

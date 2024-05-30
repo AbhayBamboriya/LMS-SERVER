@@ -1,14 +1,14 @@
-import asyncHandler from '../middlewares/asyncHandler.middleware.js';
+// import asyncHandler from '../middlewares/asyncHandler.middleware.js';
 import User from '../models/user.model.js';
-import AppError from '../utils/AppError.js';
+import AppError from '../utils/error.util.js';
 import sendEmail from '../utils/sendEmail.js';
 
 /**
- * @CONTACT_US
- * @ROUTE @POST {{URL}}/api/v1/contact
- * @ACCESS Public
- */
-export const contactUs = asyncHandler (async (req, res, next) => {
+//  * @CONTACT_US
+//  * @ROUTE @POST {{URL}}/api/v1/contact
+//  * @ACCESS Public
+//  */
+export const contactUs =  (async (req, res, next) => {
   // Destructuring the required data from req.body
   const { name, email, message } = req.body;
 
@@ -20,7 +20,8 @@ export const contactUs = asyncHandler (async (req, res, next) => {
   try {
     const subject = 'Contact Us Form';
     const textMessage = `${name} - ${email} <br /> ${message}`;
-
+    console.log('sub',subject);
+    console.log('mess',textMessage);
     // Await the send email
     await sendEmail(process.env.CONTACT_US_EMAIL, subject, textMessage);
   } catch (error) {
@@ -39,7 +40,7 @@ export const contactUs = asyncHandler (async (req, res, next) => {
  * @ROUTE @GET {{URL}}/api/v1/admin/stats/users
  * @ACCESS Private(ADMIN ONLY)
  */
-export const userStats = asyncHandler(async (req, res, next) => {
+export const userStats = (async (req, res, next) => {
   const allUsersCount = await User.countDocuments();
 
   const subscribedUsersCount = await User.countDocuments({

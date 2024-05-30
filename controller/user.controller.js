@@ -170,10 +170,11 @@ const forgotPassword=async(req,res,next)=>{
     try{ 
         // method that will send the  mail;  ;
         const e=await sendEmail(email,subject,message)
-        console.log("email "+e);
+        // console.log("email "+e);
         res.status(200).json({
             success:true,
-            message:`Reset Password token has been send to ${email} successfully`
+            message:`Reset Password token has been send to ${email} successfully`,
+            resetToken
         })
     }
     catch(e){
@@ -184,11 +185,18 @@ const forgotPassword=async(req,res,next)=>{
     }
 }
 const resetPassword=async(req,res,next)=>{
+    console.log('reset Password');
+    console.log('req from frontend',req);
     console.log("params "+req.params);
-    console.log("body "+req.body);
+    console.log("body "+JSON.stringify(req.body));
     const {resetToken} = req.params;
     const{password}=req.body
     console.log("reset Token "+resetToken);
+    if(!password){
+        return next(
+            new AppError('password not present',400)
+        )
+    }
     console.log("password "+password);
     const forgotPasswordToken=crypto
         .createHash('sha256')
@@ -211,7 +219,7 @@ const resetPassword=async(req,res,next)=>{
     user.save();
     res.status(200).json({
         success:true,
-        message:'Password changed successfully'
+        message:'Password changed success'
     })
 }
 
@@ -307,9 +315,28 @@ const updateUser=async(req,res,next)=>{
 }
 
 // }
+const checkUser=async(req,res,next)=>{
+    console.log('req',req.body);
+    const {email}=req.body;
+    console.log('email',email);
+    if(!email){
+        return next(new AppError('Email is required',400))
+    }
+    const user=await User.findOne({email})
+    if(!user){
+        return next(new AppError('Enter registered email',400))
+    } 
+    res.status(200).json({
+        success:true,
+        message:'User Found'
+    })
+
+
+}
 export{
     register,
     getProfile,
+    checkUser,
     logout,
     updateUser,
     login,
