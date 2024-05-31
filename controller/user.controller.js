@@ -118,7 +118,7 @@ const logout=(req,res)=>{
         message:"User Logged out successfully"
     })
 }
-// 
+ 
 const getProfile=async(req,res,next)=>{
     console.log("user"+req.user);
     try{
