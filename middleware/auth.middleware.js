@@ -1,3 +1,4 @@
+import User from "../models/user.model.js";
 import AppError from "../utils/error.util.js"
 import jwt from 'jsonwebtoken'
 const isLoggedIn = async (req,res,next)=>{
@@ -45,9 +46,10 @@ console.log('checkiiiii',JSON.stringify(roles));
 
 
 const authorisedSubscriber = async(req,res,next) =>{
-    const subscritption=req.user.subscription
-    const currentUser=req.user.role;
-    if(currentUser !== 'ADMIN' && subscritption.status !== 'active'){
+    const user=await User.findById(req.user.id)
+    console.log(user);
+    
+    if(user.role !== 'ADMIN' && user.subscription.status !== 'active'){
         return next(
             new AppError('Please subscribe to access these route',403)
         )
