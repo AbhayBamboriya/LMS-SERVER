@@ -22,6 +22,6 @@ export const razorpay=new Razorpay({
 })
 app.listen(PORT,async()=>{
     await connectionToDB()
-    console.log(`App is runnig at http:localhost:${PORT}`);
+    console.log(`App is running at http:localhost:${PORT}`);
 })
 
