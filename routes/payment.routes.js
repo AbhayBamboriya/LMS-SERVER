@@ -8,7 +8,7 @@ import {
 } from '../controller/payment.controller.js';
 import {
   authorisedRoles,
-  authorizeSubscribers,
+  authorisedSubscriber,
   isLoggedIn,
 } from '../middleware/auth.middleware.js';
 
@@ -18,7 +18,7 @@ router.route('/subscribe').post(isLoggedIn, buySubscription);
 router.route('/verify').post(isLoggedIn, verifySubscription);
 router
   .route('/unsubscribe')
-  .post(isLoggedIn, authorizeSubscribers, cancelSubscription);
+  .post(isLoggedIn,authorisedSubscriber , cancelSubscription);
 router.route('/razorpay-key').get(isLoggedIn, getRazorpayApiKey);
 router.route('/:count ').get(isLoggedIn, authorisedRoles('ADMIN'), allPayments);
 
