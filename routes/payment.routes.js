@@ -22,5 +22,5 @@ router
 router.route('/razorpay-key').get(isLoggedIn, getRazorpayApiKey);
 // router.route('/:count').get(isLoggedIn, authorisedRoles('ADMIN'), allPayments);
 // router.get('/check',isLoggedIn,authorisedRoles('ADMIN'),allPayments) 
-router.route('/:count').get(isLoggedIn, authorisedRoles('ADMIN'), allPayments);
+router.route('/').get(isLoggedIn, authorisedRoles('ADMIN'), allPayments);
 export default router;
