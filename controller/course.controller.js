@@ -178,6 +178,8 @@ const addLectureByCourseId=async(req,res,next)=>{
                 folder:'lms',
                 resource_type: 'video', 
             })
+            console.log('result is ',result);
+            
             if(result){
                 lectureData.lecture.public_id=result.public_id 
                 console.log('result secure',result.secure_url);
