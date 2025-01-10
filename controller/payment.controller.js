@@ -2,10 +2,10 @@
 import crypto from 'crypto';
 
 import User from '../models/user.model.js';
-import AppError from '../utils/AppError.js';
 import { razorpay } from '../server.js';
 import Payment from '../models/Payment.model.js';
 import asyncHandler from '../middleware/asyncHandler,middleware.js';
+import AppError from '../utils/error.util.js';
 
 /**
  * @ACTIVATE_SUBSCRIPTION
