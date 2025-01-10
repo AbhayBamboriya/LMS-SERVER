@@ -38,7 +38,7 @@ app.use('/ping',function(req,res){
 app.use('/api/v1',misllaneousRoutes)
 app.use('/api/v1/user',userRoutes);
 app.use('/api/v1/course',courseRoute);    
-app.use('/api/v1/payments',paymentsRoute);    
+app.use('/api/v1/payments/',paymentsRoute);    
 
 // routes of diffenent module
 // any other page which is not present and for that use *

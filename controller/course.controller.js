@@ -155,7 +155,7 @@ const addLectureByCourseId=async(req,res,next)=>{
    try{
     const {title ,description}=req.body
     const {id}=req.params;
-    console.log("idddd "+id);
+    console.log("idddd "+id,req.file);
     // if(!title || !description){
     //     return next(
     //         new AppError('All fields are required',400)
@@ -172,6 +172,7 @@ const addLectureByCourseId=async(req,res,next)=>{
         description,
         lecture:{}
     }
+    
     if(req.file){
         try{
             const result=await cloudinary.v2.uploader.upload(req.file.path,{

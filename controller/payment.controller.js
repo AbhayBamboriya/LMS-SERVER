@@ -192,7 +192,7 @@ export const getRazorpayApiKey = asyncHandler(async (_req, res, _next) => {
  * @ACCESS Private (ADMIN only)
  */
 export const allPayments = asyncHandler(async (req, res, _next) => {
-  const { count, skip } = req.query;
+  const { count, skip } = req.params;
 
   // Find all subscriptions from razorpay
   const allPayments = await razorpay.subscriptions.all({
