@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose';
+import mongoose, { model, Schema } from 'mongoose';
 
 const paymentSchema = new Schema(
   {
@@ -20,6 +20,6 @@ const paymentSchema = new Schema(
   }
 );
 
-const Payment = model('Payment', paymentSchema);
+const Payment = mongoose.model('Payment', paymentSchema);
 
 export default Payment;
