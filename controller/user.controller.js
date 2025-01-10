@@ -7,8 +7,9 @@ import crypto from 'crypto'
 import sendEmail from "../utils/sendEmail.js";
 const cookieOptions={
     maxAge:7*24*60*60*1000,//multiply by 1000 for milisecond and it will be present for 7 days\
-    // httpOnly:true,  //not be accessed thourgh javascript
-    // secure:true 
+    httpOnly:true,  //not be accessed thourgh javascript
+    secure:true ,
+    sameSite:'None'
 }
 const register  = async(req,res,next)=>{
     // console.log(req.body);
