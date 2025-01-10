@@ -1,11 +1,12 @@
 
 import crypto from 'crypto';
 
-import User from '../models/user.model.js';
-import { razorpay } from '../server.js';
-import Payment from '../models/Payment.model.js';
+// import { razorpay } from '../server.js';
 import asyncHandler from '../middleware/asyncHandler,middleware.js';
 import AppError from '../utils/error.util.js';
+import User from '../models/user.model.js';
+import Payment from '../models/Payment.model.js';
+import { razorpay } from '../server.js';
 
 /**
  * @ACTIVATE_SUBSCRIPTION
