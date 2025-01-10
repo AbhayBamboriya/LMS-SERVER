@@ -5,7 +5,7 @@ const isLoggedIn = async (req,res,next)=>{
     // due to cookie parser it can extract the token
     // console.log("cookie"+req.cookies);
     // console.log("cookie1"+req.cookie);
-    console.log("req",req.cookies);
+    console.log("req",req);
     const {token}=req.cookies
     console.log("token "+token);
     if(!token){
@@ -28,19 +28,22 @@ const isLoggedIn = async (req,res,next)=>{
 // roles is passed as list in roles
 const authorisedRoles=(...roles)=>async (req,res,next)=>{
 // req.user me jwt token ke throw saaari information mil jayegi
-console.log('checkiiiii',JSON.stringify(roles));
-    // console.log('hhh',req);
-    // console.log('body',req.body);
-    // console.log('resquest',req);
-    // console.log('re',req.data);
-    // console.log('ressss',toString(req));
+    
+    console.log('wel');
+    
     const currentUser=req.user.role
+    console.log(currentUser
+
+
+    );
     
     if(!roles.includes(currentUser)){
         return next(
             new AppError('Do not have permission to access these route ',403)
         )
     }
+    console.log('done');
+    
     next()
 }
 
