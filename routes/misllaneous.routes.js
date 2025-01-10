@@ -11,6 +11,6 @@ const router = Router();
 router.route('/contact').post(contactUs);
 router
   .route('/admin/stats/users')
-  .get(isLoggedIn, authorisedRoles('ADMIN'), userStats);
+  .get(isLoggedIn, authorisedRoles("ADMIN"), userStats);
 
 export default router;

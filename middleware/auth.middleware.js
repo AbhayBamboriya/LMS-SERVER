@@ -5,7 +5,7 @@ const isLoggedIn = async (req,res,next)=>{
     // due to cookie parser it can extract the token
     // console.log("cookie"+req.cookies);
     // console.log("cookie1"+req.cookie);
-    console.log("abh",JSON.stringify(req));
+    // console.log("abh",JSON.stringify(req));
     const {token}=req.cookies
     console.log("token "+token);
     if(!token){
