@@ -6,7 +6,7 @@ const isLoggedIn = async (req,res,next)=>{
     // console.log("cookie"+req.cookies);
     // console.log("cookie1"+req.cookie);
     // console.log("abh",JSON.stringify(req));
-    const {token}=req.Cookies
+    const {token}=req.cookies
     console.log("token "+token);
     if(!token){
         return next(new AppError('Unauthenticated , please login again',405))
