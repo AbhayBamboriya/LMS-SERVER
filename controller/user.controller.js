@@ -13,9 +13,9 @@ const cookieOptions={
 }
 const register  = async(req,res,next)=>{
     // console.log(req.body);
-    const {fullName,email,password}=req.body;
+    const {fullName,email,password,role}=req.body;
     // console.log(fullName,email,password);
-    if(!fullName || !email || !password){
+    if(!fullName || !email || !password ||!role){
         return next(new AppError('All fields are Required',400))
     }
     const userExists = await User.findOne({email})
@@ -31,7 +31,7 @@ const register  = async(req,res,next)=>{
             public_id:email,
             // secureurl is  environment variable with api key,api secret
             secure_url:'cloudinary://378171611453713:jar_yV68UrVNSKbFbxleqoBxKJQ@dix9kn7zm'
-        }
+        },role
     })
     // if not user doesnot stored succcessfully 
     if(!user){
