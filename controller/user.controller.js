@@ -227,13 +227,14 @@ const resetPassword=async(req,res,next)=>{
 }
 
 const changePassword=async(req,res,next)=>{
-
-    const {oldpassword,newpassword}= req.body
+    try{
+        
+    const { password,setPassword}= req.body
     const {id}=req.user
-    console.log('id '+id);
-    console.log("old pass "+oldpassword);
-    console.log('new pass '+newpassword);
-    if(!oldpassword || !newpassword){
+    console.log('id '+id,password,setPassword);
+    // console.log("old pass "+oldpassword);
+    // console.log('new pass '+newpassword);
+    if(!password || !setPassword){
         return next(
             new AppError('All filds are mandatory',400)
         )
@@ -246,20 +247,25 @@ const changePassword=async(req,res,next)=>{
         )
 
     }
-    const isPasswordValid=await user.comparePassword(oldpassword)
+    const isPasswordValid=await user.comparePassword(password)
     if(!isPasswordValid){
         return next(
             new AppError('Invalid old password',400)
         )
 
     }
-    user.password=newpassword
+    user.password=setPassword
     await user.save()   //to save the changes in db
     user.password=undefined
     res.status(200).json({
         success:true,
         message:'Password changed successfully'
     })
+    }
+    catch(e){
+        return next(new AppError(e.message,500)) 
+    }
+
 }
 
 const updateUser=async(req,res,next)=>{
