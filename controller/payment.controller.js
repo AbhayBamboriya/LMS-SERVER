@@ -30,8 +30,8 @@ export const buySubscription = asyncHandler(async (req, res, next) => {
   // Creating a subscription using razorpay that we imported from the server
   const subscription = await razorpay.subscriptions.create({
     plan_id: process.env.RAZORPAY_PLAN_ID, // The unique plan ID
-    customer_notify: 1, // 1 means razorpay will handle notifying the customer, 0 means we will not notify the customer
-    total_count: 12, // 12 means it will charge every month for a 1-year sub.
+    customer_notify: 1, 
+    total_count: 12, 
   });
 
   // Adding the ID and the status to the user account

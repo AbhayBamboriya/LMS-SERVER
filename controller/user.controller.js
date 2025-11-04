@@ -5,6 +5,7 @@ import cloudinary from 'cloudinary'
 import fs from 'fs/promises'
 import crypto from 'crypto'
 import sendEmail from "../utils/sendEmail.js";
+import { log } from "console";
 const cookieOptions={
     maxAge:7*24*60*60*1000,//multiply by 1000 for milisecond and it will be present for 7 days\
     httpOnly:true,  //not be accessed thourgh javascript
@@ -90,11 +91,16 @@ const login=async(req,res,next)=>{
         const {email,password}=req.body;
         if(!email || !password){
             return next (new AppError('All fields are required',400))
-        }
+        }console.log('dd');
+        
         const user=await User.findOne({email}).select('+password')
         // !user || !user.comparePassword(password)
+        console.log();
+        console.log("fvgg",user.password);
+        
+        
         if(!(user && (await user.comparePassword(password)))){
-            return next(new AppError('Email and Password doesnot match',400))
+            return next(new AppError('Email and Password does not match',400))
         }
         const token=await user.generateJWTToken()
         user.password=undefined
@@ -152,7 +158,10 @@ const getProfile=async(req,res,next)=>{
 
 // firgot and reset password is not working
 const forgotPassword=async(req,res,next)=>{
+    
     const {email}=req.body;
+    console.log('dkdfdfgjg');
+    
     if(!email){
         return next(new AppError('Email is require',400))
     }
@@ -160,20 +169,28 @@ const forgotPassword=async(req,res,next)=>{
     if(!user){
         return next(new AppError('Enter registered email',400))
     } 
+    console.log('sddaka');
+    
       // Generating the reset token via the method we have in user model
     const resetToken=await user.generatePasswordResetToken();
     // saving the token to db
     // saving the current token to DB so that for validation
+    console.log('ksdks');
+    
     await user.save() 
     // console.log("token "+resetToken);
     const resetPasswordUrl=`${process.env.FRONTEND_URL}password/${resetToken}`;
     console.log("reset Token "+resetPasswordUrl);
-    const message= 'Mail is send to registered email id' 
-    const subject='Reset Password';
+    const message= 'To reset your password click on the link given' 
+    const subject='Reset Password URL ';
     try{ 
         // method that will send the  mail;  ;
-        const e=await sendEmail(email,subject,message)
+        console.log("dslsd");
+        
+        const e=await sendEmail(email,subject,message,resetPasswordUrl)
         // console.log("email "+e);
+        console.log('dsdkssk');
+        
         res.status(200).json({
             success:true,
             message:`Reset Password token has been send to ${email} successfully`,
@@ -181,6 +198,8 @@ const forgotPassword=async(req,res,next)=>{
         })
     }
     catch(e){
+        console.log(e);
+        
         user.forgotPasswordExpiry=undefined
         user.forgotPasswordToken=undefined
         await user.save()
