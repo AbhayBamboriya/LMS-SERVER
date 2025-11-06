@@ -7,13 +7,13 @@ const isLoggedIn = async (req,res,next)=>{
     // console.log("cookie1"+req.cookie);
     // console.log("abh",JSON.stringify(req));
     const {token}=req.cookies
-    console.log("token "+token);
+    // console.log("token "+token);
     if(!token){
         return next(new AppError('Unauthenticated , please login again',405))
     }
     const userDetails=await jwt.verify(token,process.env.JWT_SECRET)
-    console.log("userDetails"+userDetails);
-    console.log('jwt',jwt);
+    // console.log("userDetails"+userDetails);
+    // console.log('jwt',jwt);
     if (!userDetails) {
 
         return next(new AppError("Unauthorized, please login to continue", 401));

@@ -45,7 +45,11 @@ const courseSchema = new Schema({
             }
         }
     ],
+    fees:{
+           type:Number,
+           required:true
 
+    },
     numberOfLecture:{
         type:Number,
         default:0,

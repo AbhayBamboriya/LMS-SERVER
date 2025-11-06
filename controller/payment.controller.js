@@ -12,41 +12,39 @@ import Payment from "../models/payment.model.js";
  * @ACCESS Private (Logged in user only)
  */
 export const buySubscription = asyncHandler(async (req, res, next) => {
-  // Extracting ID from request obj
-  const { id } = req.user;
+  try {
+    console.log("in buy subscription");
 
-  // Finding the user based on the ID
-  const user = await User.findById(id);
+    const { id } = req.user;
+    const user = await User.findById(id);
 
-  if (!user) {
-    return next(new AppError('Unauthorized, please login'));
+    if (!user) return next(new AppError("Unauthorized, please login", 401));
+    if (user.role === "ADMIN")
+      return next(new AppError("Admin cannot purchase a subscription", 400));
+
+    const subscription = await razorpay.subscriptions.create({
+      plan_id: process.env.RAZORPAY_PLAN_ID,
+      customer_notify: 1,
+      total_count: 12,
+    });
+
+    user.subscription = {
+      id: subscription.id,
+      status: subscription.status,
+    };
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Subscribed successfully",
+      subscription_id: subscription.id,
+    });
+  } catch (e) {
+    return next(new AppError(e.message, 500));
   }
-
-  // Checking the user role
-  if (user.role === 'ADMIN') {
-    return next(new AppError('Admin cannot purchase a subscription', 400));
-  }
-
-  // Creating a subscription using razorpay that we imported from the server
-  const subscription = await razorpay.subscriptions.create({
-    plan_id: process.env.RAZORPAY_PLAN_ID, // The unique plan ID
-    customer_notify: 1, 
-    total_count: 12, 
-  });
-
-  // Adding the ID and the status to the user account
-  user.subscription.id = subscription.id;
-  user.subscription.status = subscription.status;
-
-  // Saving the user object
-  await user.save();
-
-  res.status(200).json({
-    success: true,
-    message: 'subscribed successfully',
-    subscription_id: subscription.id,
-  });
 });
+
 
 /**
  * @VERIFY_SUBSCRIPTION
@@ -54,8 +52,9 @@ export const buySubscription = asyncHandler(async (req, res, next) => {
  * @ACCESS Private (Logged in user only)
  */
 export const verifySubscription = asyncHandler(async (req, res, next) => {
-  const { id } = req.user;
-  const { razorpay_payment_id, razorpay_subscription_id, razorpay_signature } =
+ try{
+   const { id } = req.user;
+  const { razorpay_payment_id,courseId, razorpay_subscription_id, razorpay_signature } =
     req.body;
 
   // Finding the user
@@ -63,7 +62,10 @@ export const verifySubscription = asyncHandler(async (req, res, next) => {
 
   // Getting the subscription ID from the user object
   const subscriptionId = user.subscription.id;
-
+  console.log('sskfdfks',subscriptionId
+    ,razorpay_payment_id
+  );
+  
   // Generating a signature with SHA256 for verification purposes
   // Here the subscriptionId should be the one which we saved in the DB
   // razorpay_payment_id is from the frontend and there should be a '|' character between this and subscriptionId
@@ -73,11 +75,15 @@ export const verifySubscription = asyncHandler(async (req, res, next) => {
     .update(`${razorpay_payment_id}|${subscriptionId}`)
     .digest('hex');
 
+    console.log(generatedSignature,razorpay_signature);
+    
+
   // Check if generated signature and signature received from the frontend is the same or not
   if (generatedSignature !== razorpay_signature) {
     return next(new AppError('Payment not verified, please try again.', 400));
   }
-
+  console.log('sssf');
+  
   // If they match create payment and store it in the DB
   await Payment.create({
     razorpay_payment_id,
@@ -87,6 +93,18 @@ export const verifySubscription = asyncHandler(async (req, res, next) => {
 
   // Update the user subscription status to active (This will be created before this)
   user.subscription.status = 'active';
+  console.log('ssdsdk');
+  
+//  await User.findByIdAndUpdate(
+//   userId,
+//   {$push: { active: courseId  }},
+
+//   { new: true }
+// );
+
+  console.log('sdddfd');
+  user.activeSubscriptions.push(courseId);
+// await user.save();
 
   // Save the user in the DB with any changes
   await user.save();
@@ -95,6 +113,10 @@ export const verifySubscription = asyncHandler(async (req, res, next) => {
     success: true,
     message: 'Payment verified successfully',
   });
+ }
+ catch(e){
+  return next(new AppError(toString(e).message,500)) 
+ }
 });
 
 /**

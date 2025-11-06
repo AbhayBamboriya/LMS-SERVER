@@ -42,9 +42,33 @@ const getLectureByCourseId=async function(req,res,next){
     }
 }
 
+const getCourseDetails=async function(req,res,next){
+    try{
+        const {id}=req.params
+        const course=await Course.findById(id);
+        console.log('course is',course);
+        
+        if(!course){
+            return next (
+                new AppError('Invalid courses id',500)
+            )
+        }
+        res.status(200).json({
+            success:true,
+            message:'Course fetched successfully', 
+            course:course
+        })
+    }
+    catch(e){
+        return next (
+            new AppError(e.message,500)
+        )
+    }
+}
+
 const createCourses=async(req,res,next)=>{
-    const {title,description,category,createdBy}=req.body;
-    if(!title || !description || !category || !createdBy){
+    const {title,description,category,createdBy,fees}=req.body;
+    if(!title || !description || !category || !createdBy || !fees){
         return next(
             new AppError('All fields are required',400)
         )
@@ -54,6 +78,7 @@ const createCourses=async(req,res,next)=>{
         title,
         description, 
         category,
+        fees,
         createdBy,
         thumbnail:{
             public_id:'Dummmy',
@@ -279,5 +304,5 @@ const addLectureByCourseId=async(req,res,next)=>{
 export{
     getLectureByCourseId,
     getAllCourses,
-    createCourses,updateCourses,removeCourses,addLectureByCourseId
+    createCourses,updateCourses,removeCourses,addLectureByCourseId,getCourseDetails
 }
