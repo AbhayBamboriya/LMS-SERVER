@@ -51,7 +51,7 @@ export const buySubscription = asyncHandler(async (req, res, next) => {
  * @ROUTE @POST {{URL}}/api/v1/payments/verify
  * @ACCESS Private (Logged in user only)
  */
-export const verifySubscription = asyncHandler(async (req, res, next) => {
+export const  verifySubscription = asyncHandler(async (req, res, next) => {
  try{
    const { id } = req.user;
   const { razorpay_payment_id,courseId, razorpay_subscription_id, razorpay_signature } =
