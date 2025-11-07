@@ -21,12 +21,15 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))        //it will extract out the query params from url
 app.use(morgan('dev'))  //morgan will track all the access point or to which url the request made at localhost and it will print it in terminal 
+
 app.use(cors({
-    // frntend ka url will be different thatswhy by using cors we can interact with frontend page
-    origin:[process.env.FRONTEND_URL],
-    // credential used because cookie can be navigate from from different localhost
-    credentials:true
+  origin: ["https://coursifydev.netlify.app", "http://localhost:5173"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true,
 }));
+
+// Important: Handle preflight requests
+app.options('*', cors());
 // cookie parser is udes to get the directly token which is used in isLoggedin method used in auth middleware
 // for parsing the token
 app.use(cookieParser()) //by using cookie parrser token can be extracted easily that is used in auth.middleware.js
