@@ -5,6 +5,7 @@ import {
   verifySubscription,
   cancelSubscription,
   allPayments,
+  // createPlan,
 } from '../controller/payment.controller.js';
 import {
   authorisedRoles,
@@ -20,7 +21,6 @@ router
   .route('/unsubscribe')
   .post(isLoggedIn,authorisedSubscriber , cancelSubscription);
 router.route('/razorpay-key').get(isLoggedIn, getRazorpayApiKey);
-// router.route('/:count').get(isLoggedIn, authorisedRoles('ADMIN'), allPayments);
-// router.get('/check',isLoggedIn,authorisedRoles('ADMIN'),allPayments) 
+// router.route('/createPlan').post(isLoggedIn,authorisedRoles('ADMIN'),createPlan)
 router.route('/').get(isLoggedIn, authorisedRoles('ADMIN'), allPayments);
 export default router;

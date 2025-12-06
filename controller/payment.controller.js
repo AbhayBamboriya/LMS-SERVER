@@ -5,28 +5,45 @@ import AppError from '../utils/error.util.js';
 import User from '../models/user.model.js';
 import { razorpay } from '../server.js';
 import Payment from "../models/payment.model.js";
+import SubscriptionPlanModel from '../models/SubscriptionPlanModel.js';
+import { log } from 'console';
 
 /**
  * @ACTIVATE_SUBSCRIPTION
  * @ROUTE @POST {{URL}}/api/v1/payments/subscribe
  * @ACCESS Private (Logged in user only)
+ * 
+ * 
  */
+
+
+
+
 export const buySubscription = asyncHandler(async (req, res, next) => {
   try {
-    console.log("in buy subscription");
+    console.log("in buy subscription",req.body);
 
     const { id } = req.user;
+     const { planId } = req.body;
+     console.log('sksdkskssdk',planId);
+     
+    // const plan = await SubscriptionPlanModel.findOne({ razorpay_plan_id: planId });
+
+    // if (!plan) return next(new AppError("Plan not found", 404));
     const user = await User.findById(id);
 
     if (!user) return next(new AppError("Unauthorized, please login", 401));
     if (user.role === "ADMIN")
       return next(new AppError("Admin cannot purchase a subscription", 400));
-
+    console.log('akakdjfssj',planId);
+    
     const subscription = await razorpay.subscriptions.create({
-      plan_id: process.env.RAZORPAY_PLAN_ID,
+      plan_id:planId,
       customer_notify: 1,
       total_count: 12,
     });
+    console.log('dosoaoa');
+    
 
     user.subscription = {
       id: subscription.id,
@@ -51,73 +68,77 @@ export const buySubscription = asyncHandler(async (req, res, next) => {
  * @ROUTE @POST {{URL}}/api/v1/payments/verify
  * @ACCESS Private (Logged in user only)
  */
-export const  verifySubscription = asyncHandler(async (req, res, next) => {
- try{
-   const { id } = req.user;
-  const { razorpay_payment_id,courseId, razorpay_subscription_id, razorpay_signature } =
-    req.body;
+export const verifySubscription = asyncHandler(async (req, res, next) => {
+  try {
+    const { id } = req.user;
+    const { razorpay_payment_id, courseId, razorpay_subscription_id, razorpay_signature } = req.body;
 
-  // Finding the user
-  const user = await User.findById(id);
+    // Validate input
+    if (!razorpay_payment_id || !razorpay_signature || !courseId) {
+      return next(new AppError("Missing required payment fields.", 400));
+    }
 
-  // Getting the subscription ID from the user object
-  const subscriptionId = user.subscription.id;
-  console.log('sskfdfks',subscriptionId
-    ,razorpay_payment_id
-  );
-  
-  // Generating a signature with SHA256 for verification purposes
-  // Here the subscriptionId should be the one which we saved in the DB
-  // razorpay_payment_id is from the frontend and there should be a '|' character between this and subscriptionId
-  // At the end convert it to Hex value
-  const generatedSignature = crypto
-    .createHmac('sha256', process.env.RAZORPAY_SECRET)
-    .update(`${razorpay_payment_id}|${subscriptionId}`)
-    .digest('hex');
+    // Fetch user
+    const user = await User.findById(id);
 
-    console.log(generatedSignature,razorpay_signature);
+    if (!user) {
+      return next(new AppError("User not found.", 404));
+    }
+
+    if (!user.subscription || !user.subscription.id) {
+      return next(new AppError("User has no subscription ID.", 400));
+    }
+    console.log('dadskskd');
     
+    const subscriptionId = user.subscription.id;
+    console.log('ssksajjq');
+    
+    // Verify signature
+    const generatedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_SECRET)
+      .update(`${razorpay_payment_id}|${subscriptionId}`)
+      .digest("hex");
+    console.log('aswqiwqwi');
+    
+    if (generatedSignature !== razorpay_signature) {
+      return next(new AppError("Payment verification failed.", 400));
+    }
 
-  // Check if generated signature and signature received from the frontend is the same or not
-  if (generatedSignature !== razorpay_signature) {
-    return next(new AppError('Payment not verified, please try again.', 400));
+    // Prevent duplicate verification
+    const existingPayment = await Payment.findOne({ razorpay_payment_id });
+    if (existingPayment) {
+      return next(new AppError("Payment already verified.", 400));
+    }
+
+    // Store payment
+    await Payment.create({
+      razorpay_payment_id,
+      razorpay_subscription_id,
+      razorpay_signature,
+    });
+
+    // Activate subscription
+    user.subscription.status = "active";
+    user.subscription.start = Date.now();
+    user.subscription.end = Date.now() + 30 * 24 * 60 * 60 * 1000;
+
+    // Add course to active subscriptions
+    if (!user.activeSubscriptions.includes(courseId)) {
+      user.activeSubscriptions.push(courseId);
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Payment verified successfully",
+    });
+
+  } catch (e) {
+    return next(new AppError(e.message, 500));
   }
-  console.log('sssf');
-  
-  // If they match create payment and store it in the DB
-  await Payment.create({
-    razorpay_payment_id,
-    razorpay_subscription_id,
-    razorpay_signature,
-  });
-
-  // Update the user subscription status to active (This will be created before this)
-  user.subscription.status = 'active';
-  console.log('ssdsdk');
-  
-//  await User.findByIdAndUpdate(
-//   userId,
-//   {$push: { active: courseId  }},
-
-//   { new: true }
-// );
-
-  console.log('sdddfd');
-  user.activeSubscriptions.push(courseId);
-// await user.save();
-
-  // Save the user in the DB with any changes
-  await user.save();
-
-  res.status(200).json({
-    success: true,
-    message: 'Payment verified successfully',
-  });
- }
- catch(e){
-  return next(new AppError(toString(e).message,500)) 
- }
 });
+
 
 /**
  * @CANCEL_SUBSCRIPTION
@@ -125,6 +146,7 @@ export const  verifySubscription = asyncHandler(async (req, res, next) => {
  * @ACCESS Private (Logged in user only)
  */
 export const cancelSubscription = asyncHandler(async (req, res, next) => {
+  try{
   const { id } = req.user;
 
   // Finding the user
@@ -193,6 +215,11 @@ export const cancelSubscription = asyncHandler(async (req, res, next) => {
     success: true,
     message: 'Subscription canceled successfully',
   });
+}
+  catch (error) {
+    console.log(error);
+    return next(new AppError(error.message, 400));
+  }
 });
 
 /**
@@ -201,11 +228,17 @@ export const cancelSubscription = asyncHandler(async (req, res, next) => {
  * @ACCESS Public
  */
 export const getRazorpayApiKey = asyncHandler(async (_req, res, _next) => {
-  res.status(200).json({
-    success: true,
-    message: 'Razorpay API key',
-    key: process.env.RAZORPAY_KEY_ID,
-  });
+  try{
+      res.status(200).json({
+        success: true,
+        message: 'Razorpay API key',
+        key: process.env.RAZORPAY_KEY_ID,
+      });
+  }
+  catch (error) {
+      console.log(error);
+      return next(new AppError(error.message, 400));
+  }
 });
 
 /**
@@ -214,6 +247,7 @@ export const getRazorpayApiKey = asyncHandler(async (_req, res, _next) => {
  * @ACCESS Private (ADMIN only)
  */
 export const allPayments = asyncHandler(async (req, res, _next) => {
+  try{
   const { count, skip } = req.params;
 
   // Find all subscriptions from razorpay
@@ -280,4 +314,43 @@ export const allPayments = asyncHandler(async (req, res, _next) => {
     finalMonths,
     monthlySalesRecord,
   });
+}
+catch (error) {
+    console.log(error);
+    return next(new AppError(error.message, 400));
+  }
 });
+
+export const createOrder = async (req, res) => {
+  try {
+    const { amount, courseId, userId } = req.body;
+
+    if (!amount || !courseId || !userId) {
+      return res.status(400).json({ success: false, message: "Missing details" });
+    }
+
+    const order = await razorpay.orders.create({
+      amount: amount ,
+      currency: "INR",
+      receipt: `order_rcpt_${Date.now()}`,
+      notes: {
+        courseId,
+        userId
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      orderId: order.id,
+      amount: amount * 100,
+      key: process.env.RAZORPAY_KEY_ID,
+    });
+
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Order creation failed",
+      error: err.message
+    });
+  }
+};

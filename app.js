@@ -5,6 +5,7 @@ import cookieParser  from 'cookie-parser'
 import morgan from 'morgan';
 import courseRoute from './routes/course.routes.js'
 import paymentsRoute from './routes/payment.routes.js'
+import SubscritptionPlanRoute from './routes/SubscriptionPlanRoute.js'
 import errorMiddleware from './middleware/error.middleware.js';
 import misllaneousRoutes from './routes/misllaneous.routes.js'
 const app=express()
@@ -42,7 +43,7 @@ app.use('/api/v1',misllaneousRoutes)
 app.use('/api/v1/user',userRoutes);
 app.use('/api/v1/course',courseRoute);    
 app.use('/api/v1/payments/',paymentsRoute);    
-
+app.use('/api/v1/subscriptionId/',SubscritptionPlanRoute);   
 // routes of diffenent module
 // any other page which is not present and for that use *
 app.all('*',(req,res)=>{

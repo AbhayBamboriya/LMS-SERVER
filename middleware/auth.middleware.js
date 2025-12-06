@@ -2,10 +2,7 @@ import User from "../models/user.model.js";
 import AppError from "../utils/error.util.js"
 import jwt from 'jsonwebtoken'
 const isLoggedIn = async (req,res,next)=>{
-    // due to cookie parser it can extract the token
-    // console.log("cookie"+req.cookies);
-    // console.log("cookie1"+req.cookie);
-    // console.log("abh",JSON.stringify(req));
+    try{
     const {token}=req.cookies
     // console.log("token "+token);
     if(!token){
@@ -24,11 +21,16 @@ const isLoggedIn = async (req,res,next)=>{
     
     next()
 }
+catch (error) {
+    console.log(error);
+    return next(new AppError(error.message, 400));
+  }
+}
 
 // roles is passed as list in roles
 const authorisedRoles=(...roles)=>async (req,res,next)=>{
 // req.user me jwt token ke throw saaari information mil jayegi
-    
+    try{
     console.log('wel');
     
     const currentUser=req.user.role
@@ -46,9 +48,15 @@ const authorisedRoles=(...roles)=>async (req,res,next)=>{
     
     next()
 }
+catch (error) {
+    console.log(error);
+    return next(new AppError(error.message, 400));
+  }
+}
 
 
 const authorisedSubscriber = async(req,res,next) =>{
+    try{
     const user=await User.findById(req.user.id)
     console.log(user);
     
@@ -59,6 +67,11 @@ const authorisedSubscriber = async(req,res,next) =>{
     }
 
     next()
+}
+catch (error) {
+    console.log(error);
+    return next(new AppError(error.message, 400));
+  }
 }
 export{
     isLoggedIn,

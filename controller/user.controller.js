@@ -14,8 +14,9 @@ const cookieOptions={
 }
 const register  = async(req,res,next)=>{
     // console.log(req.body);
+    try{
     const {fullName,email,password,role}=req.body;
-    // console.log(fullName,email,password);
+    console.log('details',fullName,email,password);
     if(!fullName || !email || !password ||!role){
         return next(new AppError('All fields are Required',400))
     }
@@ -84,6 +85,11 @@ const register  = async(req,res,next)=>{
         user
 
     })
+}
+catch (error) {
+    console.log(error);
+    return next(new AppError(error.message, 400));
+  }
 }
 
 const login=async(req,res,next)=>{
@@ -158,7 +164,7 @@ const getProfile=async(req,res,next)=>{
 
 // firgot and reset password is not working
 const forgotPassword=async(req,res,next)=>{
-    
+    try{
     const {email}=req.body;
     console.log('dkdfdfgjg');
     
@@ -207,7 +213,13 @@ const forgotPassword=async(req,res,next)=>{
         return next(new AppError(toString(e).message,500)) 
     }
 }
+catch (error) {
+    console.log(error);
+    return next(new AppError(error.message, 400));
+  }
+}
 const resetPassword=async(req,res,next)=>{
+    try{
     console.log('reset Password');
     console.log('req from frontend',req);
     console.log("params "+req.params);
@@ -244,6 +256,11 @@ const resetPassword=async(req,res,next)=>{
         success:true,
         message:'Password changed success'
     })
+}
+catch (error) {
+    console.log(error);
+    return next(new AppError(error.message, 400));
+  }
 }
 
 const changePassword=async(req,res,next)=>{
@@ -289,6 +306,7 @@ const changePassword=async(req,res,next)=>{
 }
 
 const updateUser=async(req,res,next)=>{
+    try{
     const fullName=req.body.fullName
     const id=req.user.id
     // const {id}=req.body
@@ -342,9 +360,15 @@ const updateUser=async(req,res,next)=>{
         message:"Changes are uploaded successfully"
     })
 }
+catch (error) {
+    console.log(error);
+    return next(new AppError(error.message, 400));
+  }
+}
 
 // }
 const checkUser=async(req,res,next)=>{
+    try{
     console.log('req',req.body);
     const {email}=req.body;
     console.log('email',email);
@@ -359,6 +383,11 @@ const checkUser=async(req,res,next)=>{
         success:true,
         message:'User Found'
     })
+}
+    catch (error) {
+        console.log(error);
+        return next(new AppError(error.message, 400));
+      }
 
 
 }
