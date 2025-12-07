@@ -70,17 +70,7 @@ userSchema.pre("save", async function (next) {
 userSchema.methods = {
   // import jwt from "jsonwebtoken";
 
-isTokenExpired:async function(token) {
-  try {
-    jwt.verify(token, process.env.JWT_SECRET); 
-    return false; // token is valid (NOT EXPIRED)
-  } catch (err) {
-    if (err.name === "TokenExpiredError") {
-      return true; // token is EXPIRED
-    }
-    return true; // other error = treat as expired
-  }
-},
+
 
   generateJWTToken: async function () {
     return jwt.sign(

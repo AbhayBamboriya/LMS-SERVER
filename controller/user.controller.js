@@ -231,7 +231,6 @@ function isTokenExpired(token) {
     return true; // other error = treat as expired
   }
 }
-
 const resetPassword=async(req,res,next)=>{
     try{
     console.log('reset Password');
@@ -241,12 +240,7 @@ const resetPassword=async(req,res,next)=>{
     const {resetToken} = req.params;
     const{password}=req.body
     console.log("reset Token "+resetToken);
-    const res=isTokenExpired(resetToken);
-    if(!res){
-        return next(
-            new AppError('Token has been expired',400)
-        )
-    }
+   
     if(!password){
         return next(
             new AppError('password not present',400)
@@ -419,6 +413,7 @@ export{
     updateUser,
     login,
     forgotPassword,
+    
     resetPassword,
     changePassword
 }

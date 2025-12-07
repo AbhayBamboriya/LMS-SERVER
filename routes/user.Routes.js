@@ -11,6 +11,7 @@ router.get('/me',isLoggedIn,getProfile) //first of all it will go through verifi
 //through isloggedin method which is in auth.middleware
 router.post('/reset',forgotPassword);
 router.post('/password/:resetToken',resetPassword) 
+
 router.post('/check',checkUser)
 // router.post('/password/:resetToken',(req,res)=>{
 //     res.send("helo")
