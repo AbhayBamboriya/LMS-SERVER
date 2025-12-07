@@ -173,7 +173,7 @@ const forgotPassword=async(req,res,next)=>{
     }
     const user=await User.findOne({email})
     if(!user){
-        return next(new AppError('Enter registered email',400))
+        return next(new AppError('Enter registered email only',400))
     } 
     console.log('sddaka');
     
@@ -218,6 +218,20 @@ catch (error) {
     return next(new AppError(error.message, 400));
   }
 }
+import jwt from "jsonwebtoken";
+
+function isTokenExpired(token) {
+  try {
+    jwt.verify(token, process.env.JWT_SECRET); 
+    return false; // token is valid (NOT EXPIRED)
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return true; // token is EXPIRED
+    }
+    return true; // other error = treat as expired
+  }
+}
+
 const resetPassword=async(req,res,next)=>{
     try{
     console.log('reset Password');
@@ -227,6 +241,12 @@ const resetPassword=async(req,res,next)=>{
     const {resetToken} = req.params;
     const{password}=req.body
     console.log("reset Token "+resetToken);
+    const res=isTokenExpired(resetToken);
+    if(!res){
+        return next(
+            new AppError('Token has been expired',400)
+        )
+    }
     if(!password){
         return next(
             new AppError('password not present',400)
