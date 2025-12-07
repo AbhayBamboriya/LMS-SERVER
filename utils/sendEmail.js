@@ -29,27 +29,50 @@ const sendEmail = async function (email, subject, message, URL) {
     html: htmlContent,
   });
 };
+// import nodemailer from "nodemailer";
 
-export const mail = async function (email, subject, message, URL) {
-  const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.BREVO_USER,
-    pass: process.env.BREVO_PASS,
-  },
-});
+export const mail = async (email, subject, message) => {
+  try {
+    console.log('detailsl');
+    
+    console.log(process.env.BREVO_USER);
+    console.log(process.env.BREVO_PASS);
+    
+    
+    const transporter = nodemailer.createTransport({
+      host: "smtp-relay.brevo.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.BREVO_USER,   // Your Brevo email
+        pass: process.env.BREVO_PASS,   // Your SMTP KEY
+      },
+    });
 
-  const htmlContent = `
-    <p>${message}</p>
-  `;
+    // ✅ VERIFY SMTP CONNECTION
+    await transporter.verify();
+    console.log("SMTP is working!");
 
-  await transporter.sendMail({
-    from: `"LMS Support" <${process.env.GMAIL_USER}>`,
-    to: email,
-    subject,
-    html: htmlContent,
-  });
+    // ⚠ USE Brevo verified sender, not Gmail
+    const fromEmail = process.env.BREVO_FROM;
+    console.log('from email',fromEmail,email);
+    
+    const htmlContent = `
+      <p>${message}</p>
+    `;
+
+    // SEND MAIL
+    await transporter.sendMail({
+      from: `"LMS Support" <${fromEmail}>`,
+      to: email,
+      subject,
+      html: htmlContent,
+    });
+
+    console.log("Mail Sent Successfully");
+  } catch (error) {
+    console.error("Email Error:", error);
+  }
 };
+
 export default sendEmail;
