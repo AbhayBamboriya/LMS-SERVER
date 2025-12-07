@@ -1,16 +1,12 @@
 import nodemailer from "nodemailer";
+import Brevo from "@getbrevo/brevo";
 
 const sendEmail = async function (email, subject, message, URL) {
- const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASS,
-  },
-});
-
+  const client = new Brevo.TransactionalEmailsApi();
+  client.setApiKey(
+    Brevo.TransactionalEmailsApiApiKeys.apiKey,
+    process.env.BREVO_API_KEY
+  );
 
   const htmlContent = `
     <p>${message}</p>
@@ -25,13 +21,14 @@ const sendEmail = async function (email, subject, message, URL) {
     <p>${URL}</p>
   `;
 
-  await transporter.sendMail({
-    from: `"LMS Support" <${process.env.GMAIL_USER}>`,
-    to: email,
+  await client.sendTransacEmail({
+    sender: { email: process.env.GMAIL_USER || "no-reply@yourdomain.com" },
+    to: [{ email }],
     subject,
-    html: htmlContent,
+    htmlContent,
   });
 };
+
 // import nodemailer from "nodemailer";
 
 export const mail = async (email, subject, message) => {
