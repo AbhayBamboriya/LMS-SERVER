@@ -32,12 +32,14 @@ const sendEmail = async function (email, subject, message, URL) {
 
 export const mail = async function (email, subject, message, URL) {
   const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASS,
-    },
-  });
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.BREVO_USER,
+    pass: process.env.BREVO_PASS,
+  },
+});
 
   const htmlContent = `
     <p>${message}</p>
