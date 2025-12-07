@@ -189,7 +189,7 @@ const forgotPassword=async(req,res,next)=>{
     const resetPasswordUrl=`${process.env.FRONTEND_URL}/resetPassword/${resetToken}`;
     console.log("reset Token "+resetPasswordUrl);
     const message= 'To reset your password click on the link given' 
-    const subject='Reset Password URL ';
+    const subject='Reset Password URL of Coursify ';
     try{ 
         // method that will send the  mail;  ;
         console.log("dslsd");

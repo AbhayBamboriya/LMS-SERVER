@@ -31,7 +31,7 @@ const sendEmail = async function (email, subject, message, URL) {
 
 // import nodemailer from "nodemailer";
 
-export const mail = async (email, subject, message) => {
+export const email = async (email, subject, message) => {
   try {
     console.log('detailsl');
     
@@ -63,7 +63,7 @@ export const mail = async (email, subject, message) => {
 
     // SEND MAIL
     await transporter.sendMail({
-      from: `"LMS Support" <${fromEmail}>`,
+      from: `"Coursify Support" <${fromEmail}>`,
       to: email,
       subject,
       html: htmlContent,
@@ -73,6 +73,25 @@ export const mail = async (email, subject, message) => {
   } catch (error) {
     console.error("Email Error:", error);
   }
+};
+
+export const mail = async function (email, subject, message, URL) {
+  const client = new Brevo.TransactionalEmailsApi();
+  client.setApiKey(
+    Brevo.TransactionalEmailsApiApiKeys.apiKey,
+    process.env.BREVO_API_KEY
+  );
+
+  const htmlContent = `
+    <p>${message}</p>
+  `;
+
+  await client.sendTransacEmail({
+    sender: { email: process.env.GMAIL_USER || "no-reply@yourdomain.com" },
+    to: [{ email }],
+    subject,
+    htmlContent,
+  });
 };
 
 export default sendEmail;
