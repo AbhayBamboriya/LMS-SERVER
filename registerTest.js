@@ -1,67 +1,81 @@
-import axios from "axios";
-import fs from "fs";
-import FormData from "form-data";
+import http from "k6/http";
+import { check, sleep } from "k6";
+import encoding from "k6/encoding";
 
+export const options = {
+  vus: 10,
+  iterations: 400,
+};
+
+// Load avatar file as base64
+const avatarBinary = open("./einstein.png", "b");
+
+// Data
 const firstNames = [
-  "Rehan", "Myra", "Ira", "Kabir", "Naina",
-  "Arjun", "Vanya", "Rudra", "Zoya", "Reeva",
-  "Laksh", "Aira", "Dev", "Inaaya", "Hriday",
-  "Tanish", "Amaira", "Ishika", "Reyansh", "Meher"
+  "Aarav", "Kiara", "Vivaan", "Siya", "Atharv",
+  "Anaya", "Ishaan", "Tara", "Advait", "Mahira",
+  "Riaan", "Saanvi", "Aryan", "Kashvi", "Revaan",
+  "Eesha", "Vihaan", "Tanishka", "Arin", "Nyra"
 ];
 const lastNames = [
-  "Shekhawat", "Bhargava", "Rajput", "Goswami", "Kulkarni",
-  "Phadke", "Banerjee", "Gokhale", "Talwar", "Khanna",
-  "Bajpai", "Sengupta", "Dwivedi", "Gandhi", "Bedekar",
-  "Kohli", "Purohit", "Saraf", "Lulla", "Wadhwa"
+  "Malhotra", "Chatterjee", "Sarin", "Mehta", "Bhasin",
+  "Tandon", "Sharma", "Kapoor", "Nair", "Iyer",
+  "Deshpande", "Sodhi", "Ahluwalia", "Gupta", "Saxena",
+  "Rastogi", "Chhabra", "Suri", "Bhandari", "Sethi"
 ];
-
 
 const roles = ["USER", "ADMIN"];
 
-// Helper functions
-function getRandomElement(arr) {
+function getRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function generateRandomEmail(firstName, lastName) {
-  const num = Math.floor(Math.random() * 10000);
-  return `${firstName.toLowerCase()}.${lastName.toLowerCase()}${num}@example.com`;
-}
-let i=1;
-// Create a single user
-async function createUser() {
-  const firstName = getRandomElement(firstNames);
-  const lastName = getRandomElement(lastNames);
-
-  // FormData payload
-  const form = new FormData();
-  form.append("fullName", `${firstName} ${lastName}`);
-  form.append("email", generateRandomEmail(firstName, lastName));
-  form.append("password", "Chintu@123");
-  form.append("role", getRandomElement(roles));
-  form.append("avatar", fs.createReadStream("./einstein.png")); // Upload the image
-
-  try {
-    const res = await axios.post(
-      "http://localhost:4052/api/v1/user/register",
-      form,
-      {
-        headers: form.getHeaders(), // Important for multipart/form-data
-      }
-    );
-    console.log(i,res.status, form.getBuffer().toString());
-    i++;
-  } catch (err) {
-    console.error("Error:", err.message);
-  }
+function generateEmail(first, last) {
+  return `${first.toLowerCase()}.${last.toLowerCase()}${Math.floor(
+    Math.random() * 10000
+  )}@example.com`;
 }
 
-// Create multiple users
-async function createUsers(count) {
-  for (let i = 0; i < count; i++) {
-    await createUser();
-  }
-}
+export default function () {
+  const first = getRandom(firstNames);
+  const last = getRandom(lastNames);
 
-// Generate 2 users
-createUsers(3);
+  const boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW";
+
+  const payload =
+    `--${boundary}\r\n` +
+    `Content-Disposition: form-data; name="fullName"\r\n\r\n${first} ${last}\r\n` +
+
+    `--${boundary}\r\n` +
+    `Content-Disposition: form-data; name="email"\r\n\r\n${generateEmail(first, last)}\r\n` +
+
+    `--${boundary}\r\n` +
+    `Content-Disposition: form-data; name="password"\r\n\r\nChintu@123\r\n` +
+
+    `--${boundary}\r\n` +
+    `Content-Disposition: form-data; name="role"\r\n\r\n${getRandom(roles)}\r\n` +
+
+    `--${boundary}\r\n` +
+    `Content-Disposition: form-data; name="avatar"; filename="einstein.png"\r\n` +
+    `Content-Type: image/png\r\n\r\n${avatarBinary}\r\n` +
+
+    `--${boundary}--`;
+
+  const headers = {
+    "Content-Type": `multipart/form-data; boundary=${boundary}`,
+  };
+
+  const res = http.post(
+    "http://localhost:4052/api/v1/user/register",
+    payload,
+    { headers }
+  );
+
+  check(res, {
+    "status is 200 or 201": (r) => r.status === 200 || r.status === 201,
+  });
+
+  console.log("Status:", res.status);
+
+  sleep(0.2);
+}

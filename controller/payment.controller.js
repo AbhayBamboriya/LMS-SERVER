@@ -36,14 +36,19 @@ export const buySubscription = asyncHandler(async (req, res, next) => {
     if (user.role === "ADMIN")
       return next(new AppError("Admin cannot purchase a subscription", 400));
     console.log('akakdjfssj',planId);
-    
-    const subscription = await razorpay.subscriptions.create({
-      plan_id:planId,
-      customer_notify: 1,
-      total_count: 12,
-    });
-    console.log('dosoaoa');
-    
+    try {
+  const subscription = await razorpay.subscriptions.create({
+    plan_id: planId,
+    customer_notify: 1,
+    total_count: 12,
+  });
+
+  console.log("Subscription Created →", subscription);
+} 
+catch (err) {
+  console.log("RAZORPAY ERROR →", JSON.stringify(err.error, null, 2));
+}
+
 
     user.subscription = {
       id: subscription.id,
