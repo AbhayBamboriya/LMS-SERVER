@@ -20,8 +20,6 @@ export const ResetPasswordEmil =  (async (req, res, next) => {
     
       const subject = 'Contact Us Form';
       const textMessage = `${name} - ${email} <br /> ${message}`;
-      console.log('sub',subject);
-      console.log('mess',textMessage);
       // Await the send email
       await sendEmail(process.env.CONTACT_US_EMAIL, subject, textMessage);
   
@@ -51,8 +49,6 @@ export const contactUs =  (async (req, res, next) => {
 
     const subject = 'Contact Us Form';
     const textMessage = `${name} - ${email} <br /> ${message}`;
-    console.log('sub',subject);
-    console.log('mess',textMessage);
     // Await the send email
     await mail(process.env.CONTACT_US_EMAIL, subject, textMessage);
   
@@ -63,7 +59,6 @@ export const contactUs =  (async (req, res, next) => {
   });
 }
    catch (error) {
-    console.log(error);
     return next(new AppError(error.message, 400));
   }
 });
@@ -89,8 +84,7 @@ export const userStats = (async (req, res, next) => {
       });
     }
     catch (error) {
-    console.log(error);
-    return next(new AppError(error.message, 400));
-  }
+      return next(new AppError(error.message, 400));
+    }
     
 });

@@ -2,6 +2,10 @@ import mongoose, { model, Schema } from 'mongoose';
 
 const paymentSchema = new Schema(
   {
+    subscription_id:{
+       type: String,
+      required: true,
+    },
     razorpay_payment_id: {
       type: String,
       required: true,

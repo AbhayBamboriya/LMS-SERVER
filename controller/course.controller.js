@@ -8,7 +8,6 @@ import SubscriptionPlanModel from "../models/SubscriptionPlanModel.js";
 const getAllCourses=async function(req,res,next){
     // selecting all the things accept lecture
     const course=await Course.find({}).select('-lectures')
-    // console.log("course "+course);
     try{
         res.status(200).json({
             success:true,
@@ -73,109 +72,99 @@ const getCourseDetails=async function(req,res,next){
 
 const createCourses=async(req,res,next)=>{
     try{
-    const {title,description,category,createdBy,fees}=req.body;
-    const duration=367;
-    if(!title || !description || !category || !createdBy || !fees){
-        return next(
-            new AppError('All fields are required',400)
-        )
-    }
-    const price=fees
-    // creating the courses instance
-    const courses=await Course.create({ 
-        title,
-        description, 
-        category,
-        fees,
-        createdBy,
-        thumbnail:{
-            public_id:'Dummmy',
-            secure_url:'Dummy'   
-        }
-    })
-
-    if(!courses){
-        return next(
-            new AppError('Course could not be created try again',500)
-        )
-    }
-
-    if(req.file){
-        try{
-            const result=await cloudinary.v2.uploader.upload(req.file.path,{
-                folder:'lms'
-            })
-            if(result){
-                courses.thumbnail.public_id=result.public_id
-                courses.thumbnail.secure_url=result.secure_url
-            }
-    
-            fs.rm(`uploads/${req.file.filename}`)
-        }
-        catch(e){
+        const {title,description,category,createdBy,fees}=req.body;
+        const duration=367;
+        if(!title || !description || !category || !createdBy || !fees){
             return next(
-                new AppError(e.message,500)
+                new AppError('All fields are required',400)
             )
         }
-    }
-    const amountInPaise = price * 100;
+        const price=fees
+        const courses=await Course.create({ 
+            title,
+            description, 
+            category,
+            fees,
+            createdBy,
+            thumbnail:{
+                public_id:'Dummmy',
+                secure_url:'Dummy'   
+            }
+        })
 
-    let razorpayPlan;
-try {
-  razorpayPlan = await razorpay.plans.create({
-    period: duration >= 365 ? "yearly" : "monthly",
-    interval: 1,
-    item: {
-      name: `${title} Subscription`,
-      amount: amountInPaise,
-      currency: "INR",
-      description: `Subscription plan for ${title}`,
-    },
-  });
-  console.log("RAZORPAY PLAN CREATED:", razorpayPlan);
-} catch (err) {
-  console.log("RAZORPAY ERROR:", err.error);
-  return next(new AppError("Razorpay plan creation failed", 500));
-}
+        if(!courses){
+            return next(
+                new AppError('Course could not be created try again',500)
+            )
+        }
 
-  console.log('ffjs plan of razorpay',razorpayPlan);
-  
+        if(req.file){
+            try{
+                const result=await cloudinary.v2.uploader.upload(req.file.path,{
+                    folder:'lms'
+                })
+                if(result){
+                    courses.thumbnail.public_id=result.public_id
+                    courses.thumbnail.secure_url=result.secure_url
+                }
+        
+                fs.rm(`uploads/${req.file.filename}`)
+            }
+            catch(e){
+                return next(
+                    new AppError(e.message,500)
+                )
+            }
+        }
+        const amountInPaise = price * 100;
 
-  // 3️⃣ Save Subscription Plan in DB
-  
-  const subscriptionPlan = await SubscriptionPlanModel.create({
-    name: `${title} Subscription`,
-    price,
-    duration,
-    courseId: courses._id,
-    razorpay_plan_id: razorpayPlan.id,
-  });
+        let razorpayPlan;
+        try {
+            razorpayPlan = await razorpay.plans.create({
+                period: duration >= 365 ? "yearly" : "monthly",
+                interval: 1,
+                item: {
+                name: `${title} Subscription`,
+                amount: amountInPaise,
+                currency: "INR",
+                description: `Subscription plan for ${title}`,
+                },
+            });
+        } catch (err) {
+            return next(new AppError("Razorpay plan creation failed", 500));
+        }
 
-    await courses.save()    
+        
+        const subscriptionPlan = await SubscriptionPlanModel.create({
+            name: `${title} Subscription`,
+            price,
+            duration,
+            courseId: courses._id,
+            razorpay_plan_id: razorpayPlan.id,
+        });
 
-    res.status(200).json({
-        success:true,
-        message:"Courses created successfully",
-        courses
-    })   }
-     catch(e){
+        await courses.save()    
+
+        res.status(200).json({
+            success:true,
+            message:"Courses created successfully",
+            courses
+        })   
+    }   
+    catch(e){
         return next (
             new AppError(e.message,500)
         )
-    }
+        }
 
 }
 const updateCourses=async(req,res,next)=>{
     try{
         const {id}=req.params
         const course=await Course.findByIdAndUpdate(
-            // data must be updated to which id
-            id,
-            {
-                // overwriting the contnt
+            id,{
                 $set:req.body
-            },
-            {
+            },{
                 // it is used to check the new data is correct or not
                 runValidators:true
             }
@@ -225,14 +214,8 @@ const removeCourses=async(req,res,next)=>{
 
 export const removeLectureFromCourse =async (req, res, next) => {
     try{
-        console.log('req',req.params);
-        
         const { courseId, lectureId } = req.params;
-        console.log('removing lecture',req);
-        
-        console.log("id is ",courseId,lectureId);
-    
-        // Checking if both courseId and lectureId are present
+
         if (!courseId) {
         return next(new AppError('Course ID is required', 400));
         }
@@ -241,25 +224,20 @@ export const removeLectureFromCourse =async (req, res, next) => {
         return next(new AppError('Lecture ID is required', 400));
         }
     
-        // Find the course uding the courseId
         const course = await Course.findById(courseId);
     
-        // If no course send custom message
         if (!course) {
         return next(new AppError('Invalid ID or Course does not exist.', 404));
         }
     
-        // Find the index of the lecture using the lectureId
         const lectureIndex = course.lectures.findIndex(
-        (lecture) => lecture._id.toString() === lectureId.toString()
+            (lecture) => lecture._id.toString() === lectureId.toString()
         );
     
-        // If returned index is -1 then send error as mentioned below
         if (lectureIndex === -1) {
         return next(new AppError('Lecture does not exist.', 404));
         }
     
-        // Delete the lecture from cloudinary
         await cloudinary.v2.uploader.destroy(
         course.lectures[lectureIndex].lecture.public_id,
         {
@@ -356,5 +334,9 @@ const addLectureByCourseId=async(req,res,next)=>{
 export{
     getLectureByCourseId,
     getAllCourses,
-    createCourses,updateCourses,removeCourses,addLectureByCourseId,getCourseDetails
+    createCourses,
+    updateCourses,
+    removeCourses,
+    addLectureByCourseId,
+    getCourseDetails
 }

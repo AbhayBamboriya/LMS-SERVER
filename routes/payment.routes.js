@@ -16,11 +16,13 @@ import {
 const router = Router();
 
 router.route('/subscribe').post(isLoggedIn, buySubscription);
+
 router.route('/verify').post(isLoggedIn, verifySubscription);
-router
-  .route('/unsubscribe')
-  .post(isLoggedIn,authorisedSubscriber , cancelSubscription);
+
+router.route('/unsubscribe').post(isLoggedIn , cancelSubscription);
+
 router.route('/razorpay-key').get(isLoggedIn, getRazorpayApiKey);
-// router.route('/createPlan').post(isLoggedIn,authorisedRoles('ADMIN'),createPlan)
+
 router.route('/').get(isLoggedIn, authorisedRoles('ADMIN'), allPayments);
+
 export default router;

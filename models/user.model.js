@@ -47,12 +47,20 @@ const userSchema = new Schema(
       id: { type: String },
       status: { type: String },
     },
+    activeSubscriptions: [
+        {
+          subscriptionId: { type: String, required: true },
+          courseId: { type: String, required: true },
+          status: {
+            type: String,
+            enum: ["created","active", "inactive","expired","cancelled"],
+            default:"inactive"
+          },
+           start: { type: Date, default: null },   
+            end: { type: Date, default: null }
+        },
+    ],
 
-    // ✅ New field: stores active course subscriptions (array of course IDs)
-    activeSubscriptions: {
-      type: [String], // Array of course IDs
-      default: [],
-    },
   },
   {
     timestamps: true,

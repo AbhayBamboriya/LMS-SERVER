@@ -1,15 +1,11 @@
-// routes/subscriptionRoutes.js
 import express from "express";
-// import SubscriptionPlan from "../models/SubscriptionPlan.js";
-// import AppError from "../utils/AppError.js";
+
 import SubscriptionPlanModel from "../models/SubscriptionPlanModel.js";
 import AppError from "../utils/error.util.js";
 
 const router = express.Router();
 
-// @desc   Get subscription plans by course ID
-// @route  GET /api/subscription-plans/course/:courseId
-// @access Public (or Private if you want auth)
+
 router.get(
   "/plan/:courseId",
   async (req, res, next) => {
